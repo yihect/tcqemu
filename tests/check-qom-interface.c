@@ -13,6 +13,7 @@
 
 #include "qom/object.h"
 #include "qemu/module.h"
+#include "hacking/hacking.h"
 
 
 #define TYPE_TEST_IF "test-interface"
@@ -100,5 +101,11 @@ int main(int argc, char **argv)
     g_test_add_func("/qom/interface/intermediate_impl",
                     interface_intermediate_test);
 
-    return g_test_run();
+    int ret = g_test_run();
+
+#ifdef CONFIG_HACKING
+    ghash_table_dump(hacking_type_table, print_type_table);
+#endif
+
+    return ret;
 }

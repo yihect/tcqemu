@@ -471,6 +471,7 @@ gtk=""
 gtk_gl="no"
 tls_priority="NORMAL"
 gnutls=""
+hacking=""
 nettle=""
 gcrypt=""
 gcrypt_hmac="no"
@@ -1395,6 +1396,10 @@ for opt do
   ;;
   --enable-gnutls) gnutls="yes"
   ;;
+  --disable-hacking) hacking="no"
+  ;;
+  --enable-hacking) hacking="yes"
+  ;;
   --disable-nettle) nettle="no"
   ;;
   --enable-nettle) nettle="yes"
@@ -1813,6 +1818,7 @@ disabled with --disable-FEATURE, default is enabled if available:
   debug-mutex     mutex debugging support
   libpmem         libpmem support
   xkbcommon       xkbcommon support
+  hacking         do some hacking?(by yihect)
 
 NOTE: The object files are built at the place where configure is launched
 EOF
@@ -2923,6 +2929,14 @@ if test "$gcrypt" = "yes" && test "$nettle" = "yes"
 then
     error_exit "Only one of gcrypt & nettle can be enabled"
 fi
+
+##########################################
+# hacking - do some hacking" (by yihect)
+
+if test "$hacking" != "yes"; then
+	hacking="no"
+fi
+
 
 ##########################################
 # libtasn1 - only for the TLS creds/session test suite
@@ -6326,6 +6340,7 @@ echo "VTE support       $vte $(echo_version $vte $vteversion)"
 echo "TLS priority      $tls_priority"
 echo "GNUTLS support    $gnutls"
 echo "libgcrypt         $gcrypt"
+echo "do some hacking   $hacking"
 echo "nettle            $nettle $(echo_version $nettle $nettle_version)"
 echo "libtasn1          $tasn1"
 echo "PAM               $auth_pam"
@@ -6799,6 +6814,9 @@ if test "$gcrypt" = "yes" ; then
   if test "$gcrypt_hmac" = "yes" ; then
     echo "CONFIG_GCRYPT_HMAC=y" >> $config_host_mak
   fi
+fi
+if test "$hacking" = "yes" ; then
+  echo "CONFIG_HACKING=y" >> $config_host_mak
 fi
 if test "$nettle" = "yes" ; then
   echo "CONFIG_NETTLE=y" >> $config_host_mak

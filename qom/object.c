@@ -71,12 +71,14 @@ struct TypeImpl
 
 static Type type_interface;
 
+GHashTable *hacking_type_table;
 static GHashTable *type_table_get(void)
 {
     static GHashTable *type_table;
 
     if (type_table == NULL) {
         type_table = g_hash_table_new(g_str_hash, g_str_equal);
+	hacking_type_table = type_table;
     }
 
     return type_table;

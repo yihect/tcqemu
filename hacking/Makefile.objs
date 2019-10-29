@@ -1,0 +1,1 @@
+util-obj-$(CONFIG_HACKING) += hacking_utils.o
