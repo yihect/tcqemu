@@ -13,10 +13,6 @@
 #include "qemu/osdep.h"
 #include "hacking/hacking.h"
 
-void print_type_table(void *key, void *value)
-{
-    g_print("name: %s --> (struct TypeImpl *)(0x%lx)\n", (const char *)key, (unsigned long)value);
-}
 
 void ghash_table_dump(GHashTable *hash_table, printfun pfun)
 {

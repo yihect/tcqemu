@@ -260,6 +260,9 @@ static void type_initialize_interface(TypeImpl *ti, TypeImpl *interface_type,
 
     ti->class->interfaces = g_slist_append(ti->class->interfaces,
                                            iface_impl->class);
+#ifdef CONFIG_HACKING
+    ti->class->interfaces_nb++;
+#endif
 }
 
 static void object_property_free(gpointer data)
@@ -306,6 +309,10 @@ static void type_initialize(TypeImpl *ti)
 
         g_assert(parent->class_size <= ti->class_size);
         memcpy(ti->class, parent->class, parent->class_size);
+#ifdef CONFIG_HACKING
+        /* the memcpy above will copy this nb, so we reset it */
+        ti->class->interfaces_nb = 0;
+#endif
         ti->class->interfaces = NULL;
         ti->class->properties = g_hash_table_new_full(
             g_str_hash, g_str_equal, g_free, object_property_free);
@@ -2547,3 +2554,45 @@ static void register_types(void)
 }
 
 type_init(register_types)
+
+#ifdef CONFIG_HACKING
+
+/* print functions for hacking */
+void print_type_table(void *key, void *value)
+{
+    struct TypeImpl *t = (struct TypeImpl *)value;
+    g_print("name: \"%s\" --> (struct TypeImpl *)(0x%lx)\n",
+                (const char *)key, (unsigned long)t);
+    g_print("\t TypeImpl: cls=0x%lx csize=0x%x isize=0x%x pname=\"%s\" \
+                ptype=0x%lx\n",
+                t->class, t->class_size, t->instance_size, t->parent,
+                t->parent_type);
+
+    /* there may be uninitialized type in type hash table */
+    if (!t->class) {
+        return;
+    }
+
+    struct ObjectClass *oc = OBJECT_CLASS(t->class);
+    if (oc->interfaces_nb > 0) {
+        g_print("\t\t implemented %d interfaces:\n", oc->interfaces_nb);
+
+        GSList *e;
+        for (e = oc->interfaces; e; e = e->next) {
+            InterfaceClass *iface = e->data;
+            ObjectClass *klass = OBJECT_CLASS(iface);
+
+            /* get TypeImpl of interface implemention logic */
+            struct TypeImpl *tiil = klass->type;
+            g_print("\t\t\t \"%s\" by \"%s\" with:\n",
+                            iface->interface_type->name, tiil->name);
+            g_print("\t\t\t\t TypeImpl: cls=0x%lx csize=0x%x isize=0x%x \
+                    pname=\"%s\" ptype=0x%lx\n",
+                    tiil->class, tiil->class_size, tiil->instance_size,
+                    tiil->parent, tiil->parent_type);
+        }
+    }
+}
+
+#endif
+

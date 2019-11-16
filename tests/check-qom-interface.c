@@ -24,7 +24,7 @@
 #define TEST_IF(obj) \
      INTERFACE_CHECK(TestIf, (obj), TYPE_TEST_IF)
 
-typedef struct TestIf TestIf;
+typedef struct TafafafaeestIf TestIf;
 
 typedef struct TestIfClass {
     InterfaceClass parent_class;
@@ -104,6 +104,10 @@ int main(int argc, char **argv)
     int ret = g_test_run();
 
 #ifdef CONFIG_HACKING
+    g_print("sizeof(Object): 0x%x\n", sizeof(struct Object));
+    g_print("sizeof(ObjectClass): 0x%x\n", sizeof(struct ObjectClass));
+    g_print("sizeof(InterfaceClass): 0x%x\n", sizeof(struct InterfaceClass));
+    g_print("sizeof(TestIfClass): 0x%x\n", sizeof(struct TestIfClass));
     ghash_table_dump(hacking_type_table, print_type_table);
 #endif
 
