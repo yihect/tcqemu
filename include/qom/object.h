@@ -394,6 +394,7 @@ struct ObjectClass
     GSList *interfaces;
 #ifdef CONFIG_HACKING
     unsigned interfaces_nb;
+    const char *class_name;
 #endif
 
     const char *object_cast_cache[OBJECT_CLASS_CAST_CACHE];
@@ -476,6 +477,9 @@ struct TypeInfo
 
     bool abstract;
     size_t class_size;
+#ifdef CONFIG_HACKING
+    const char *class_name;
+#endif
 
     void (*class_init)(ObjectClass *klass, void *data);
     void (*class_base_init)(ObjectClass *klass, void *data);

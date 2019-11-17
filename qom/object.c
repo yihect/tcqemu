@@ -46,6 +46,9 @@ struct TypeImpl
     const char *name;
 
     size_t class_size;
+#ifdef CONFIG_HACKING
+    const char *class_name;
+#endif
 
     size_t instance_size;
 
@@ -113,6 +116,9 @@ static TypeImpl *type_new(const TypeInfo *info)
     ti->parent = g_strdup(info->parent);
 
     ti->class_size = info->class_size;
+#ifdef CONFIG_HACKING
+    ti->class_name = g_strdup(info->class_name);
+#endif
     ti->instance_size = info->instance_size;
 
     ti->class_init = info->class_init;
@@ -185,6 +191,21 @@ static bool type_has_parent(TypeImpl *type)
 {
     return (type->parent != NULL);
 }
+
+#ifdef CONFIG_HACKING
+static char *type_class_get_class_name(TypeImpl *ti)
+{
+    if (ti->class_name) {
+        return ti->class_name;
+    }
+
+    if (type_has_parent(ti)) {
+        return type_class_get_class_name(type_get_parent(ti));
+    }
+
+    return "ObjectClass";
+}
+#endif
 
 static size_t type_class_get_size(TypeImpl *ti)
 {
@@ -284,6 +305,9 @@ static void type_initialize(TypeImpl *ti)
     }
 
     ti->class_size = type_class_get_size(ti);
+#ifdef CONFIG_HACKING
+    ti->class_name = type_class_get_class_name(ti);
+#endif
     ti->instance_size = type_object_get_size(ti);
     /* Any type with zero instance_size is implicitly abstract.
      * This means interface types are all abstract.
@@ -345,6 +369,9 @@ static void type_initialize(TypeImpl *ti)
             g_str_hash, g_str_equal, g_free, object_property_free);
     }
 
+#ifdef CONFIG_HACKING
+    ti->class->class_name = ti->class_name;
+#endif
     ti->class->type = ti;
 
     while (parent) {
@@ -2538,6 +2565,9 @@ static void register_types(void)
 {
     static TypeInfo interface_info = {
         .name = TYPE_INTERFACE,
+#ifdef CONFIG_HACKING
+        .class_name = "InterfaceClass",
+#endif
         .class_size = sizeof(InterfaceClass),
         .abstract = true,
     };
@@ -2563,10 +2593,11 @@ void print_type_table(void *key, void *value)
     struct TypeImpl *t = (struct TypeImpl *)value;
     g_print("name: \"%s\" --> (struct TypeImpl *)(0x%lx)\n",
                 (const char *)key, (unsigned long)t);
-    g_print("\t TypeImpl: cls=0x%lx csize=0x%x isize=0x%x pname=\"%s\" \
-                ptype=0x%lx\n",
-                t->class, t->class_size, t->instance_size, t->parent,
-                t->parent_type);
+    g_print("\t TypeImpl: cls=0x%lx cname=\"%s\" csize=0x%x isize=0x%x "
+                "pname=\"%s\" ptype=0x%lx\n",
+                t->class, t->class ? t->class->class_name : "UNINITed",
+                t->class_size, t->instance_size,
+                t->parent, t->parent_type);
 
     /* there may be uninitialized type in type hash table */
     if (!t->class) {
@@ -2586,10 +2617,10 @@ void print_type_table(void *key, void *value)
             struct TypeImpl *tiil = klass->type;
             g_print("\t\t\t \"%s\" by \"%s\" with:\n",
                             iface->interface_type->name, tiil->name);
-            g_print("\t\t\t\t TypeImpl: cls=0x%lx csize=0x%x isize=0x%x \
-                    pname=\"%s\" ptype=0x%lx\n",
-                    tiil->class, tiil->class_size, tiil->instance_size,
-                    tiil->parent, tiil->parent_type);
+            g_print("\t\t\t\t TypeImpl: cls=0x%lx cname=\"%s\" csize=0x%x "
+                    "isize=0x%x pname=\"%s\" ptype=0x%lx\n",
+                    tiil->class, tiil->class->class_name, tiil->class_size,
+                    tiil->instance_size, tiil->parent, tiil->parent_type);
         }
     }
 }

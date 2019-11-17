@@ -36,6 +36,9 @@ static const TypeInfo test_if_info = {
     .name          = TYPE_TEST_IF,
     .parent        = TYPE_INTERFACE,
     .class_size = sizeof(TestIfClass),
+#ifdef CONFIG_HACKING
+    .class_name = "TestIfClass",
+#endif
 };
 
 #define PATTERN 0xFAFBFCFD
