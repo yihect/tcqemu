@@ -18,6 +18,7 @@ typedef void (printfun)(void *key, void *val);
 
 /* print functions */
 void print_type_table(void *key, void *value);
+void print_properties_table(void *key, void *value);
 
 /**
  * ghash_table_dump:
@@ -25,7 +26,7 @@ void print_type_table(void *key, void *value);
  *
  * This function will dump contents of @hash_table
  */
-void ghash_table_dump(GHashTable *hash_table, printfun pfun);
+void ghash_table_dump(const char *info, GHashTable *hash_table, printfun pfun);
 
 
 #endif

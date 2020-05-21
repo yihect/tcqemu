@@ -111,7 +111,7 @@ int main(int argc, char **argv)
     g_print("sizeof(ObjectClass): 0x%x\n", sizeof(struct ObjectClass));
     g_print("sizeof(InterfaceClass): 0x%x\n", sizeof(struct InterfaceClass));
     g_print("sizeof(TestIfClass): 0x%x\n", sizeof(struct TestIfClass));
-    ghash_table_dump(hacking_type_table, print_type_table);
+    ghash_table_dump("all type:", hacking_type_table, print_type_table);
 #endif
 
     return ret;

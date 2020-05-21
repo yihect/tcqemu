@@ -2625,5 +2625,14 @@ void print_type_table(void *key, void *value)
     }
 }
 
+/* print properties of Object/ObjectClass */
+void print_properties_table(void *key, void *value)
+{
+	ObjectProperty *oprop = (ObjectProperty *)value;
+
+	g_print("\topaque 0x%lx named \"%s\" of type \"%s\" \n",
+		(unsigned long)value, (const char *)key, (const char *)oprop->type);
+}
+
 #endif
 

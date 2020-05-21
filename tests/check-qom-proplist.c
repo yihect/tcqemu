@@ -26,6 +26,7 @@
 #include "qemu/option.h"
 #include "qemu/config-file.h"
 #include "qom/object_interfaces.h"
+#include "hacking/hacking.h"
 
 
 #define TYPE_DUMMY "qemu-dummy"
@@ -170,6 +171,9 @@ static const TypeInfo dummy_info = {
     .instance_finalize = dummy_finalize,
     .class_size = sizeof(DummyObjectClass),
     .class_init = dummy_class_init,
+#ifdef CONFIG_HACKING
+    .class_name = "DummyObjectClass",
+#endif
     .interfaces = (InterfaceInfo[]) {
         { TYPE_USER_CREATABLE },
         { }
@@ -363,6 +367,18 @@ static void test_dummy_createv(void)
 
     g_assert(object_resolve_path_component(parent, "dummy0")
              == OBJECT(dobj));
+
+#ifdef CONFIG_HACKING
+    g_print("parent canonical path: %s\n", object_get_canonical_path(parent));
+    ghash_table_dump("props of parent Object:", parent->properties, print_properties_table);
+
+    Object *o = OBJECT(dobj);
+    g_print("object canonical path: %s\n", object_get_canonical_path(o));
+    ghash_table_dump("props of Object:", o->properties, print_properties_table);
+
+    ObjectClass *oc = OBJECT_CLASS(object_get_class(dobj));
+    ghash_table_dump("props of ObjectClass:", oc->properties, print_properties_table);
+#endif
 
     object_unparent(OBJECT(dobj));
 }
