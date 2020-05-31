@@ -26,6 +26,7 @@
 #include "qemu/option.h"
 #include "qemu/config-file.h"
 #include "qom/object_interfaces.h"
+#include "qemu/option_int.h"
 #include "hacking/hacking.h"
 
 
@@ -338,10 +339,37 @@ static const TypeInfo dummy_backend_info = {
 
 static QemuOptsList qemu_object_opts = {
     .name = "object",
-    .implied_opt_name = "qom-type",
+    .implied_opt_name = "qom-type",	/* a implied option: qom-type=TYPE_DUMMY */
     .head = QTAILQ_HEAD_INITIALIZER(qemu_object_opts.head),
     .desc = {
-        { }
+#ifdef CONFIG_HACKING
+	    /* add some desc for some option */
+        {
+            .name = "qom-type",
+            .type = QEMU_OPT_STRING,
+            .help = "type of object to create",
+	    .def_value_str = "extra_value",
+        },
+        {
+            .name = "bv",
+            .type = QEMU_OPT_STRING /*QEMU_OPT_BOOL*/,	/* two different levels of QemuOpt and Object Property.
+					   when set BOOL type here, we must use on/off in QemuOpt level.
+					   but we can use yes/no on OptVisitor.
+					   see difference in qemu_opt_parse() and opts_type_bool() */
+            .help = "bool value",
+        },
+        {
+            .name = "av",
+            .type = QEMU_OPT_STRING,	/* is enum, but for QemuOpt level, we use string */
+            .help = "enum number",
+        },
+        {
+            .name = "sv",
+            .type = QEMU_OPT_STRING,
+            .help = "some string",
+        },
+#endif
+        { /* end of list */ }
     },
 };
 
@@ -437,6 +465,18 @@ static void test_dummy_createcmdl(void)
     opts = qemu_opts_parse(&qemu_object_opts, params, true, &err);
     g_assert(err == NULL);
     g_assert(opts);
+
+#ifdef CONFIG_HACKING
+    /* QemuOptsList(with desc)
+     * -> QemuOpts(identified by id)
+     * -> QemuOpt(name&value) */
+    qemu_opts_print_help(&qemu_object_opts, true);
+
+    QemuOpts *tempopts;
+    QTAILQ_FOREACH(tempopts, &qemu_object_opts.head, next) {
+	    qemu_opts_print(tempopts, "|");
+    }
+#endif
 
     dobj = DUMMY_OBJECT(user_creatable_add_opts(opts, &err));
     g_assert(err == NULL);
