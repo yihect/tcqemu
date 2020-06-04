@@ -2557,6 +2557,7 @@ void object_class_property_set_description(ObjectClass *klass,
 
 static void object_class_init(ObjectClass *klass, void *data)
 {
+	/* hacking: here add a "type" property in the ObjectClass */
     object_class_property_add_str(klass, "type", qdev_get_type,
                                   NULL, &error_abort);
 }

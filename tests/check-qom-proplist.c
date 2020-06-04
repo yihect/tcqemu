@@ -485,6 +485,19 @@ static void test_dummy_createcmdl(void)
     g_assert(dobj->bv == true);
     g_assert(dobj->av == DUMMY_PLATYPUS);
 
+#ifdef CONFIG_HACKING
+    Object *parent = object_get_objects_root();
+    g_print("\nparent canonical path: %s\n", object_get_canonical_path(parent));
+    ghash_table_dump("props of parent Object:", parent->properties, print_properties_table);
+
+    Object *o = OBJECT(dobj);
+    g_print("object canonical path: %s\n", object_get_canonical_path(o));
+    ghash_table_dump("props of Object:", o->properties, print_properties_table);
+
+    ObjectClass *oc = OBJECT_CLASS(object_get_class(dobj));
+    ghash_table_dump("props of ObjectClass:", oc->properties, print_properties_table);
+#endif
+
     user_creatable_del("dev0", &err);
     g_assert(err == NULL);
     error_free(err);
@@ -576,6 +589,9 @@ static void test_dummy_getenum(void)
 }
 
 
+/* we may use object_property_iter_next() in our ghash_table_dump(),
+ * but if we use this, we'll get an extra propperty named "type", which
+ * is added in object_class_init(). This makes sense from OO's view. */
 static void test_dummy_prop_iterator(ObjectPropertyIterator *iter)
 {
     bool seenbv = false, seensv = false, seenav = false, seentype = false;
