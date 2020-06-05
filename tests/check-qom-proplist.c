@@ -698,6 +698,34 @@ static void test_qom_partial_path(void)
 
     object_unparent(obj2b);
     object_unparent(cont1);
+
+#ifdef CONFIG_HACKING
+    /* all containers will be created on demand in container_get() */
+    Object *child_cont = container_get(root, "/pcont/cont");
+    Object *obj_in_p = object_new(TYPE_DUMMY);
+    Object *obj_in_c = object_new(TYPE_DUMMY);
+
+    object_property_add_child(child_cont, "childobj", obj_in_c, &error_abort);
+    object_unref(obj_in_c);
+
+    g_print("child container canonical path: %s\n", object_get_canonical_path(child_cont));
+    g_print("obj_in_child_container canonical path: %s\n", object_get_canonical_path(obj_in_c));
+
+    ambiguous = false;
+    Object *parent_cont = object_resolve_path("pcont", &ambiguous);
+    g_assert(!ambiguous);
+    g_assert(parent_cont);
+    object_property_add_child(parent_cont, "parentdobj", obj_in_p, &error_abort);
+    object_unref(obj_in_p);
+
+    g_print("parent containercanonical path: %s\n", object_get_canonical_path(parent_cont));
+    g_print("obj_in_parent_container canonical path: %s\n", object_get_canonical_path(obj_in_p));
+
+    object_unparent(obj_in_c);
+    object_unparent(obj_in_p);
+    object_unparent(child_cont);
+    object_unparent(parent_cont);
+#endif
 }
 
 int main(int argc, char **argv)
