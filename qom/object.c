@@ -31,6 +31,10 @@
 #include "qapi/qmp/qstring.h"
 #include "qemu/error-report.h"
 
+#ifdef CONFIG_HACKING
+#include "hacking/hacking.h"
+#endif
+
 #define MAX_INTERFACES 32
 
 typedef struct InterfaceImpl InterfaceImpl;
@@ -196,14 +200,14 @@ static bool type_has_parent(TypeImpl *type)
 static char *type_class_get_class_name(TypeImpl *ti)
 {
     if (ti->class_name) {
-        return ti->class_name;
+        return (char *)ti->class_name;
     }
 
     if (type_has_parent(ti)) {
         return type_class_get_class_name(type_get_parent(ti));
     }
 
-    return "ObjectClass";
+    return (char *)"ObjectClass";
 }
 #endif
 
@@ -2596,9 +2600,9 @@ void print_type_table(void *key, void *value)
                 (const char *)key, (unsigned long)t);
     g_print("\t TypeImpl: cls=0x%lx cname=\"%s\" csize=0x%x isize=0x%x "
                 "pname=\"%s\" ptype=0x%lx\n",
-                t->class, t->class ? t->class->class_name : "UNINITed",
-                t->class_size, t->instance_size,
-                t->parent, t->parent_type);
+                (unsigned long)t->class, t->class ? t->class->class_name : "UNINITed",
+                (unsigned int)t->class_size, (unsigned int)t->instance_size,
+                t->parent, (unsigned long)t->parent_type);
 
     /* there may be uninitialized type in type hash table */
     if (!t->class) {
@@ -2620,8 +2624,8 @@ void print_type_table(void *key, void *value)
                             iface->interface_type->name, tiil->name);
             g_print("\t\t\t\t TypeImpl: cls=0x%lx cname=\"%s\" csize=0x%x "
                     "isize=0x%x pname=\"%s\" ptype=0x%lx\n",
-                    tiil->class, tiil->class->class_name, tiil->class_size,
-                    tiil->instance_size, tiil->parent, tiil->parent_type);
+                    (unsigned long)tiil->class, tiil->class->class_name, (unsigned int)tiil->class_size,
+                    (unsigned int)tiil->instance_size, tiil->parent, (unsigned long)tiil->parent_type);
         }
     }
 }
