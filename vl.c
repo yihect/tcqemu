@@ -215,6 +215,10 @@ static int default_sdcard = 1;
 static int default_vga = 1;
 static int default_net = 1;
 
+#ifdef CONFIG_HACKING
+int g_stop_here = 1;
+#endif
+
 static struct {
     const char *driver;
     int *flag;
@@ -2842,6 +2846,9 @@ int main(int argc, char **argv, char **envp)
     const char *incoming = NULL;
     bool userconfig = true;
     bool nographic = false;
+#ifdef CONFIG_HACKING
+    bool halt_machine = false;
+#endif
     int display_remote = 0;
     const char *log_mask = NULL;
     const char *log_file = NULL;
@@ -3164,6 +3171,11 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_mem_prealloc:
                 mem_prealloc = 1;
                 break;
+#ifdef CONFIG_HACKING
+            case QEMU_OPTION_halt:
+                halt_machine = true;
+                break;
+#endif
             case QEMU_OPTION_d:
                 log_mask = optarg;
                 break;
@@ -3817,6 +3829,15 @@ int main(int argc, char **argv, char **envp)
             }
         }
     }
+
+#ifdef CONFIG_HACKING
+    if (halt_machine) {
+        while(g_stop_here) {
+            sleep(1);
+        }
+    }
+#endif
+
     /*
      * Clear error location left behind by the loop.
      * Best done right after the loop.  Do not insert code here!

@@ -4897,6 +4897,14 @@ CN=laptop.example.com,O=Example Home,L=London,ST=London,C=GB
 
 ETEXI
 
+DEF("halt", 0, QEMU_OPTION_halt, \
+    "-halt              halt machine at startup\n",
+    QEMU_ARCH_ALL)
+STEXI
+@item -halt
+@findex -halt
+Halt machine at startup.
+ETEXI
 
 HXCOMM This is the last statement. Insert new options before this line!
 STEXI
